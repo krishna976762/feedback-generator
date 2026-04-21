@@ -11,6 +11,8 @@ import { validateForm } from "../utils/validation";
 import { useFeedbackContext } from "../context/FeedbackContext";
 import { generatePDF } from "../utils/pdfGenerator";
 import { API_BASE_URL } from "../config/api";
+// import { generateAISummary } from "../utils/openai";
+import { generateAISummary } from "../utils/geminiai";
 
 function FeedbackForm() {
   const {
@@ -89,6 +91,9 @@ function FeedbackForm() {
   }, []);
 
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
+  const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
+  const [aiSummaryResult, setAISummaryResult] = useState(null);
+  const [aiSummaryError, setAISummaryError] = useState("");
   const [dbData, setDbData] = useState({ skills: [], clientSkills: [] });
 
   const [feedbackType, setFeedbackType] = useState("internal");
@@ -301,6 +306,63 @@ function FeedbackForm() {
     }
   };
 
+  const handleGenerateAISummary = async () => {
+    setAISummaryError("");
+    setAISummaryResult(null);
+
+    const validationErrors = validateForm(
+      candidateName,
+      experience,
+      skills,
+      concepts,
+      finalRemarks,
+    );
+
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      const firstErrorKey = Object.keys(validationErrors)[0];
+      const element = document.querySelector(`[data-error="${firstErrorKey}"]`);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      return;
+    }
+
+    const requestPayload = {
+      candidate_name: candidateName,
+      experience,
+      skills,
+      concepts,
+      overall_feedback: finalRemarks,
+    };
+
+    setIsGeneratingSummary(true);
+    try {
+      const aiResponse = await generateAISummary(requestPayload);
+      setAISummaryResult(aiResponse);
+
+      await fetch(`${API_BASE_URL}/feedbacks`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          candidate_name: candidateName,
+          experience,
+          skills,
+          concepts,
+          overall_feedback: finalRemarks,
+          ai_summary: aiResponse,
+          created_at: new Date().toISOString(),
+        }),
+      });
+    } catch (error) {
+      setAISummaryError(error?.message || "Unable to generate AI summary.");
+    } finally {
+      setIsGeneratingSummary(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white py-8 px-4">
       <Header />
@@ -388,6 +450,90 @@ function FeedbackForm() {
         />
 
         <FinalRemarks finalRemarks={finalRemarks} onRemarksChange={setFinalRemarks} errors={errors} />
+
+        <div className="rounded-3xl border border-gray-200 bg-gray-50 p-6 space-y-4">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h3 className="text-2xl font-bold text-gray-900">AI Summary</h3>
+              <p className="text-sm text-gray-600">
+                Generate a candidate summary, strengths, weaknesses, and recommendation from the form data.
+              </p>
+            </div>
+            <button
+              className="inline-flex items-center justify-center rounded-xl bg-red-600 px-6 py-3 text-white text-base font-semibold shadow-lg transition hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={handleGenerateAISummary}
+              disabled={isGeneratingSummary}
+            >
+              {isGeneratingSummary ? (
+                <>
+                  <svg
+                    className="mr-2 h-5 w-5 animate-spin"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                  >
+                    <circle
+                      className="opacity-25"
+                      cx="12"
+                      cy="12"
+                      r="10"
+                      strokeWidth="4"
+                    />
+                    <path
+                      className="opacity-75"
+                      fill="currentColor"
+                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                    />
+                  </svg>
+                  Generating AI Summary...
+                </>
+              ) : (
+                "Generate AI Summary"
+              )}
+            </button>
+          </div>
+
+          {aiSummaryError && (
+            <div className="rounded-xl bg-red-50 border border-red-200 p-4 text-red-700">
+              {aiSummaryError}
+            </div>
+          )}
+
+          {aiSummaryResult && (
+            <div className="space-y-6">
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900">Summary</h4>
+                <p className="mt-2 text-gray-700">{aiSummaryResult.summary}</p>
+              </div>
+
+              <div className="grid gap-6 sm:grid-cols-2">
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900">Strengths</h4>
+                  <ul className="mt-3 list-disc list-inside text-gray-700">
+                    {aiSummaryResult.strengths.map((item, index) => (
+                      <li key={`strength-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="text-lg font-semibold text-gray-900">Weaknesses</h4>
+                  <ul className="mt-3 list-disc list-inside text-gray-700">
+                    {aiSummaryResult.weaknesses.map((item, index) => (
+                      <li key={`weakness-${index}`}>{item}</li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-white p-4 border border-gray-200">
+                <p className="text-sm font-semibold text-gray-600">Recommendation</p>
+                <p className="mt-2 text-xl font-bold text-gray-900">
+                  {aiSummaryResult.recommendation}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
 
         <DownloadButton
           onDownload={handleDownloadPDF}
