@@ -123,47 +123,65 @@
   ],
   "clientSkills": [
     {
-      "id": "1771588258062",
+      "id": "1776775294145",
       "department": "javascript",
       "skills": [
         {
-          "id": 1771588245184,
+          "id": 1776775381446,
+          "name": "Node Js",
+          "concepts": [
+            "Express Js",
+            "Caching (Redis)",
+            "Database query optimization"
+          ]
+        },
+        {
+          "id": 1776775515295,
           "name": "Angular",
           "concepts": [
-            "Route"
+            "Routing & Navigation",
+            "State Management",
+            "Basic Security Concepts"
           ]
         }
       ],
-      "clientId": "client-1771588258062",
-      "clientName": "Client 1"
+      "clientId": "client-1776775725401",
+      "clientName": "Diacto Technology"
     },
     {
-      "id": "1771588330929",
-      "department": "python",
+      "id": "1776776799361",
+      "department": "javascript",
       "skills": [
         {
-          "id": 1771588304247,
-          "name": "Django",
+          "id": 1776776770879,
+          "name": "React",
           "concepts": [
-            "API"
+            "Hooks",
+            "Life-cycle Methods",
+            "Redux"
           ]
         }
       ],
-      "clientId": "client-1771588330929",
-      "clientName": "Client 2"
+      "clientId": "client-1776776799361",
+      "clientName": "Musafir"
     },
     {
-      "id": "1772087561177",
-      "department": "python",
+      "id": "1776776949309",
+      "department": "javascript",
       "skills": [
         {
-          "id": 1772087513646,
-          "name": "data",
-          "concepts": []
+          "id": 1776776916265,
+          "name": "Node Js",
+          "concepts": [
+            "Express Js",
+            "Mongo DB",
+            "REST API"
+          ]
         }
       ],
-      "clientId": "client-1772087561177",
-      "clientName": "Client 3"
+      "clientId": "client-1776776949309",
+      "clientName": "Sagacity"
     }
-  ]
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
 }

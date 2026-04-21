@@ -6,7 +6,6 @@ import { generatePDF } from "../utils/pdfGenerator";
 
 function PreviewPage() {
   const { formData } = useFeedbackContext();
-  console.log("PreviewPage formData:", formData);
   const navigate = useNavigate();
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
@@ -100,6 +99,7 @@ function PreviewPage() {
         skills={formData.skills}
         concepts={formData.concepts}
         finalRemarks={formData.finalRemarks}
+        aiSummary={formData.aiSummary}
         date={formData.date}
         showTitle={false}
       />

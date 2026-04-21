@@ -50,6 +50,7 @@ function FeedbackForm() {
       skills: savedSkills,
       concepts: savedConcepts,
       finalRemarks: savedRemarks,
+      aiSummary: savedAISummary,
       feedbackType: savedType,
       department: savedDept,
       selectedDepartment: savedDeptAlt,
@@ -63,6 +64,7 @@ function FeedbackForm() {
       (savedSkills && savedSkills.length > 0) ||
       (savedConcepts && savedConcepts.length > 0) ||
       savedRemarks ||
+      savedAISummary ||
       savedType ||
       savedDept ||
       savedDeptAlt ||
@@ -74,6 +76,7 @@ function FeedbackForm() {
       if (savedSkills && savedSkills.length > 0) setSkills(savedSkills);
       if (savedConcepts && savedConcepts.length > 0) setConcepts(savedConcepts);
       if (savedRemarks) setFinalRemarks(savedRemarks);
+      if (savedAISummary) setAISummaryResult(savedAISummary);
       if (savedType) setFeedbackType(savedType);
       const deptToUse = savedDept || savedDeptAlt;
       if (deptToUse) setSelectedDepartment(deptToUse);
@@ -233,7 +236,7 @@ function FeedbackForm() {
   /* ---------- Preview ---------- */
   const handlePreview = () => {
     const validationErrors = validateForm(candidateName, experience, skills, concepts, finalRemarks);
-    
+
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       // Scroll to first error
@@ -341,6 +344,24 @@ function FeedbackForm() {
       const aiResponse = await generateAISummary(requestPayload);
       setAISummaryResult(aiResponse);
 
+      // Persist AI summary to context for preview and PDF
+      updateFormData({
+        candidateName,
+        experience,
+        skills,
+        concepts,
+        finalRemarks,
+        aiSummary: aiResponse,
+        selectedSkills: skills,
+        selectedConcepts: concepts,
+        feedbackType,
+        department: selectedDepartment,
+        selectedDepartment,
+        clientId: selectedClient,
+        selectedClient,
+        clientName,
+      });
+
       await fetch(`${API_BASE_URL}/feedbacks`, {
         method: "POST",
         headers: {
@@ -373,28 +394,28 @@ function FeedbackForm() {
           <div className="flex gap-2">
             <button
               onClick={() => setFeedbackType("internal")}
-              className={`px-4 py-1 rounded ${
-                feedbackType === "internal"
+              className={`px-4 py-1 rounded ${feedbackType === "internal"
                   ? "bg-red-600 text-white"
                   : "bg-white border"
-              }`}
+                }`}
             >
               Internal
             </button>
 
             <button
               onClick={() => setFeedbackType("client")}
-              className={`px-4 py-1 rounded ${
-                feedbackType === "client"
+              className={`px-4 py-1 rounded ${feedbackType === "client"
                   ? "bg-red-600 text-white"
                   : "bg-white border"
-              }`}
+                }`}
             >
               Client
             </button>
           </div>
 
           {/* Client dropdown */}
+
+
           {feedbackType === "client" && (
             <select
               value={selectedClient}
@@ -411,6 +432,7 @@ function FeedbackForm() {
           )}
 
           {/* Department dropdown */}
+         
           <select
             value={selectedDepartment}
             onChange={(e) => setSelectedDepartment(e.target.value)}

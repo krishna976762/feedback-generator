@@ -9,6 +9,7 @@ export const FeedbackProvider = ({ children }) => {
     skills: [{ name: "", rating: "" }],
     concepts: [{ topic: "", remark: "" }],
     finalRemarks: "",
+    aiSummary: null,
     date: new Date().toLocaleDateString(),
     // new fields for form persistence
     feedbackType: "internal",

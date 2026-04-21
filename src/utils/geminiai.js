@@ -92,7 +92,6 @@ Do not include markdown.
 Do not include explanation.
 Return valid JSON only.
 `;
-console.log("Generated Prompt:", prompt);
   try {
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",

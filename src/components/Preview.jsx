@@ -1,4 +1,4 @@
-function Preview({ candidateName, clientName, experience, skills, concepts, finalRemarks, date, showTitle = true }) {
+function Preview({ candidateName, clientName, experience, skills, concepts, finalRemarks, aiSummary, date, showTitle = true }) {
   // Filter out empty skills (where both name and rating are empty)
   const filteredSkills = skills.filter(skill => 
     skill.name && skill.name.trim() && skill.rating && skill.rating.toString().trim()
@@ -149,6 +149,50 @@ function Preview({ candidateName, clientName, experience, skills, concepts, fina
             </p>
           </div>
         </div>
+
+        {/* AI Summary */}
+        {aiSummary && (
+          <div className="space-y-4">
+            <h3 className="text-xl font-bold text-gray-800 mb-3 flex items-center gap-2">
+              <div className="h-8 w-1 bg-red-600 rounded-full"></div>
+              AI Generated Summary
+            </h3>
+            <div className="bg-gray-50 rounded-xl p-6 border-2 border-gray-200 space-y-4">
+              {aiSummary.summary && (
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-2">Summary</h4>
+                  <p className="text-gray-700 leading-relaxed">{aiSummary.summary}</p>
+                </div>
+              )}
+              {aiSummary.strengths && aiSummary.strengths.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-2">Strengths</h4>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    {aiSummary.strengths.map((strength, i) => (
+                      <li key={i}>{strength}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {aiSummary.weaknesses && aiSummary.weaknesses.length > 0 && (
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-2">Weaknesses</h4>
+                  <ul className="list-disc list-inside text-gray-700 space-y-1">
+                    {aiSummary.weaknesses.map((weakness, i) => (
+                      <li key={i}>{weakness}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {aiSummary.recommendation && (
+                <div>
+                  <h4 className="font-semibold text-gray-800 mb-2">Recommendation</h4>
+                  <p className="text-gray-700 font-medium">{aiSummary.recommendation}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
